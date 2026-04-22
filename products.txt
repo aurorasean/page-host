@@ -7,3 +7,6 @@ staging/product1
 staging/product2
 prod/product1
 prod/product2
+
+staging/product3
+prod/product3
