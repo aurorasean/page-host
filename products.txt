@@ -1,0 +1,9 @@
+# Products list — one entry per line in the format: env/product
+# Lines starting with # are comments and are ignored.
+# Supported environments: staging, prod (controls badge colour)
+# Add or remove lines here to update the landing page automatically.
+
+staging/product1
+staging/product2
+prod/product1
+prod/product2

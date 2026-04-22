@@ -36,22 +36,55 @@ page-host/
         └── index.html
 ```
 
+## products.txt
+
+The root landing page reads [`products.txt`](products.txt) at runtime to build the list of cards. Each non-blank, non-comment line must follow the format:
+
+```
+env/product
+```
+
+Example:
+
+```
+# staging builds
+staging/product1
+staging/product2
+
+# production builds
+prod/product1
+prod/product2
+```
+
+- Lines starting with `#` are treated as comments and ignored.
+- The order of lines controls the display order.
+- `staging` and `prod` receive coloured badges automatically; any other environment name gets a neutral blue badge.
+
 ## Adding a New Product
 
-1. Create the required directories:
-   ```bash
-   mkdir -p staging/<new-product> prod/<new-product>
+1. Add a line to `products.txt`:
    ```
-2. Add an `index.html` (or any HTML files) inside each directory.
-3. Add a link card for the new product to the root `index.html` landing page.
-4. Commit and push – the [deploy workflow](.github/workflows/deploy.yml) will publish the site automatically.
+   staging/my-new-product
+   prod/my-new-product
+   ```
+2. Create the corresponding directories and HTML files:
+   ```bash
+   mkdir -p staging/my-new-product prod/my-new-product
+   # drop an index.html into each
+   ```
+3. Commit and push – the [deploy workflow](.github/workflows/deploy.yml) will publish the site automatically.
 
 ## Adding a New Environment
 
-1. Create a top-level directory for the environment (e.g. `preview/`).
-2. Add product subdirectories and HTML files inside it.
-3. Add a new section for the environment in the root `index.html`.
-4. Commit and push.
+1. Add lines to `products.txt` using the new environment name, e.g.:
+   ```
+   preview/my-product
+   ```
+2. Create the directory and HTML files:
+   ```bash
+   mkdir -p preview/my-product
+   ```
+3. Commit and push.
 
 ## Deployment
 

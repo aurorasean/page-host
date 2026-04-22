@@ -47,42 +47,74 @@
     .card p  { font-size: 0.875rem; color: #586069; }
     section { margin-bottom: 2.5rem; }
     section > h2 { font-size: 1.25rem; margin-bottom: 1rem; color: #24292e; border-bottom: 2px solid #e1e4e8; padding-bottom: 0.4rem; }
+    #error { color: #cb2431; margin-top: 1rem; font-size: 0.9rem; }
   </style>
 </head>
 <body>
   <h1>🌐 Page Host</h1>
   <p class="subtitle">Multi-environment, multi-product static page hosting</p>
+  <div id="content"></div>
+  <p id="error" hidden></p>
 
-  <section>
-    <h2>🟡 Staging</h2>
-    <div class="grid">
-      <a class="card" href="staging/product1/">
-        <span class="env staging">Staging</span>
-        <h2>Product 1</h2>
-        <p>Staging build of Product 1</p>
-      </a>
-      <a class="card" href="staging/product2/">
-        <span class="env staging">Staging</span>
-        <h2>Product 2</h2>
-        <p>Staging build of Product 2</p>
-      </a>
-    </div>
-  </section>
+  <script>
+    const ENV_META = {
+      staging: { icon: '🟡', label: 'Staging' },
+      prod:    { icon: '🟢', label: 'Production' },
+    };
 
-  <section>
-    <h2>🟢 Production</h2>
-    <div class="grid">
-      <a class="card" href="prod/product1/">
-        <span class="env prod">Prod</span>
-        <h2>Product 1</h2>
-        <p>Production build of Product 1</p>
-      </a>
-      <a class="card" href="prod/product2/">
-        <span class="env prod">Prod</span>
-        <h2>Product 2</h2>
-        <p>Production build of Product 2</p>
-      </a>
-    </div>
-  </section>
+    function envMeta(env) {
+      return ENV_META[env] || { icon: '🔵', label: env };
+    }
+
+    function buildSection(env, products) {
+      const { icon, label } = envMeta(env);
+      const cards = products.map(product => `
+        <a class="card" href="${env}/${product}/">
+          <span class="env ${env}">${label}</span>
+          <h2>${product}</h2>
+          <p>${label} build of ${product}</p>
+        </a>`).join('');
+      return `
+        <section>
+          <h2>${icon} ${label}</h2>
+          <div class="grid">${cards}</div>
+        </section>`;
+    }
+
+    function parseProducts(text) {
+      // Group by environment, preserving order of first appearance
+      const groups = new Map();
+      text.split('\n').forEach(raw => {
+        const line = raw.trim();
+        if (!line || line.startsWith('#')) return;
+        const slash = line.indexOf('/');
+        if (slash === -1) return;
+        const env = line.slice(0, slash).trim();
+        const product = line.slice(slash + 1).trim();
+        if (!env || !product) return;
+        if (!groups.has(env)) groups.set(env, []);
+        groups.get(env).push(product);
+      });
+      return groups;
+    }
+
+    fetch('products.txt')
+      .then(res => {
+        if (!res.ok) throw new Error(`Could not load products.txt (HTTP ${res.status})`);
+        return res.text();
+      })
+      .then(text => {
+        const groups = parseProducts(text);
+        const html = Array.from(groups.entries())
+          .map(([env, products]) => buildSection(env, products))
+          .join('');
+        document.getElementById('content').innerHTML = html || '<p>No products found in products.txt.</p>';
+      })
+      .catch(err => {
+        const el = document.getElementById('error');
+        el.textContent = `Error: ${err.message}`;
+        el.hidden = false;
+      });
+  </script>
 </body>
 </html>
